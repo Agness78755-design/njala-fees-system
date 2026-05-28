@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Njala Fees System</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .admin-wrap { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Mini chart bars */
+    .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+    .mini-bar {
+      flex: 1; border-radius: 2px 2px 0 0;
+      background: var(--green-300); transition: background var(--transition);
+    }
+    .mini-bar:hover { background: var(--green-500); }
+
+    /* Student row detail expand */
+    .expand-row { display: none; background: var(--green-50); }
+    .expand-row.open { display: table-row; }
+
+    /* Filters bar */
+    .filter-bar {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input[type="text"] {
+      padding: 0.55rem 1rem 0.55rem 2.4rem;
+      border: 1.5px solid var(--gray-200); border-radius: var(--radius-md);
+      font-size: 0.85rem; background: var(--gray-100); outline: none;
+      transition: all var(--transition); flex: 1; min-width: 200px;
+      position: relative;
+    }
+
+    .filter-bar input:focus {
+      background: var(--white); border-color: var(--green-400);
+    }
+
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap i { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 0.85rem; }
+    .search-wrap input { width: 100%; padding: 0.55rem 1rem 0.55rem 2.4rem; border: 1.5px solid var(--gray-200); border-radius: var(--radius-md); font-size: 0.85rem; background: var(--gray-100); outline: none; }
+
+    .donut-wrap {
+      position: relative; width: 120px; height: 120px; margin: 0 auto 1rem;
+    }
+
+    .donut-wrap svg { transform: rotate(-90deg); }
+    .donut-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-family: var(--font-display);
+    }
+
+    .donut-center .pct { font-size: 1.4rem; font-weight: 700; color: var(--dark); }
+    .donut-center .lbl { font-size: 0.65rem; color: var(--gray-400); text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<div class="admin-wrap">
+
+  <!-- ── Admin Header ── -->
+  <div class="admin-header">
+    <div class="logo" style="flex:1">
+      <div class="logo-mark" style="width:38px;height:38px;font-size:1rem">N</div>
+      <div class="logo-text">
+        <div class="logo-title" style="font-size:1rem">Njala University</div>
+        <div class="logo-subtitle">Finance Administration</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <div style="text-align:right">
+        <div style="font-size:0.85rem;font-weight:600;color:var(--white)">Admin User</div>
+        <div style="font-size:0.7rem;color:var(--green-300)">Finance Officer</div>
+      </div>
+      <div class="user-avatar" style="background:var(--gold);color:var(--green-900)">FO</div>
+      <a href="login.html" class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.15)">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Admin Nav ── -->
+  <div class="admin-nav">
+    <a href="#" class="admin-nav-item active" onclick="adminPage('overview',this)">
+      <i class="fas fa-th-large"></i> Overview
+    </a>
+    <a href="#" class="admin-nav-item" onclick="adminPage('students',this)">
+      <i class="fas fa-users"></i> Students
+    </a>
+    <a href="#" class="admin-nav-item" onclick="adminPage('payments',this)">
+      <i class="fas fa-credit-card"></i> Payments
+    </a>
+    <a href="#" class="admin-nav-item" onclick="adminPage('fees',this)">
+      <i class="fas fa-file-invoice-dollar"></i> Fee Structure
+    </a>
+    <a href="#" class="admin-nav-item" onclick="adminPage('reports',this)">
+      <i class="fas fa-chart-bar"></i> Reports
+    </a>
+    <a href="#" class="admin-nav-item" onclick="adminPage('settings',this)">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+  </div>
+
+  <!-- ── Admin Body ── -->
+  <div class="admin-body">
+
+    <!-- ═══════════ OVERVIEW ═══════════ -->
+    <div id="admin-overview">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">Financial Overview</h2>
+          <p style="font-size:0.85rem;color:var(--gray-400)">Academic Year 2024/2025 — Real-time statistics</p>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <select class="btn btn-ghost btn-sm" style="font-size:0.82rem">
+            <option>2024/2025</option>
+            <option>2023/2024</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="showToast('Report generated!','success')">
+            <i class="fas fa-file-export"></i> Export Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Stats -->
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon gold"><i class="fas fa-coins"></i></div>
+            <span class="stat-trend up">↑ 12%</span>
+          </div>
+          <div class="stat-value">SLL 840M</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-card animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+            <span class="stat-trend up">↑ 8%</span>
+          </div>
+          <div class="stat-value">6,342</div>
+          <div class="stat-label">Paid Students</div>
+        </div>
+        <div class="stat-card amber animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
+            <span class="stat-trend down">↓ 3%</span>
+          </div>
+          <div class="stat-value">1,658</div>
+          <div class="stat-label">Outstanding</div>
+        </div>
+        <div class="stat-card blue animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon blue"><i class="fas fa-percentage"></i></div>
+            <span class="stat-trend up">↑ 5%</span>
+          </div>
+          <div class="stat-value">79.3%</div>
+          <div class="stat-label">Collection Rate</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content-grid">
+
+        <!-- Payment chart -->
+        <div class="card animate-fadeup">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Monthly Collections</div>
+              <div class="card-subtitle">SLL millions — 2024/2025</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:flex-end;gap:8px;height:180px;padding:0 0.5rem" id="adminChart">
+              <!-- JS rendered -->
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-top:8px;font-size:0.7rem;color:var(--gray-400)" id="adminChartLabels"></div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+          <!-- Collection by Faculty -->
+          <div class="card animate-fadeup">
+            <div class="card-header">
+              <div class="card-title">By Faculty</div>
+            </div>
+            <div class="card-body">
+              <div id="facultyBars"><!-- JS --></div>
+            </div>
+          </div>
+
+          <!-- Payment Methods Donut -->
+          <div class="card animate-fadeup">
+            <div class="card-header">
+              <div class="card-title">Payment Methods</div>
+            </div>
+            <div class="card-body" style="text-align:center">
+              <div class="donut-wrap">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--gray-200)" stroke-width="16"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--gold)" stroke-width="16"
+                    stroke-dasharray="188 126" stroke-linecap="round"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--green-500)" stroke-width="16"
+                    stroke-dasharray="94 220" stroke-dashoffset="-188" stroke-linecap="round"/>
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--blue)" stroke-width="16"
+                    stroke-dasharray="32 282" stroke-dashoffset="-282" stroke-linecap="round"/>
+                </svg>
+                <div class="donut-center">
+                  <div class="pct">100%</div>
+                  <div class="lbl">Payments</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.4rem;text-align:left">
+                <div class="flex-between" style="font-size:0.8rem">
+                  <span><span style="display:inline-block;width:10px;height:10px;background:var(--gold);border-radius:2px;margin-right:6px"></span>Orange Money</span>
+                  <strong>60%</strong>
+                </div>
+                <div class="flex-between" style="font-size:0.8rem">
+                  <span><span style="display:inline-block;width:10px;height:10px;background:var(--green-500);border-radius:2px;margin-right:6px"></span>Africell Money</span>
+                  <strong>30%</strong>
+                </div>
+                <div class="flex-between" style="font-size:0.8rem">
+                  <span><span style="display:inline-block;width:10px;height:10px;background:var(--blue);border-radius:2px;margin-right:6px"></span>Bank Transfer</span>
+                  <strong>10%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Recent Payments -->
+      <div class="card animate-fadeup">
+        <div class="card-header">
+          <div class="card-title">Recent Payments</div>
+          <button class="btn btn-secondary btn-sm" onclick="adminPage('payments',null)">View All</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="adminRecentTable">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Faculty</th>
+                <th>Amount (SLL)</th>
+                <th>Method</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminRecentBody"><!-- JS --></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ STUDENTS ═══════════ -->
+    <div id="admin-students" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">Student Management</h2>
+          <p style="font-size:0.85rem;color:var(--gray-400)">8,000 enrolled students</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddStudentModal()">
+          <i class="fas fa-user-plus"></i> Add Student
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search by name, ID, email…" id="studentSearch" oninput="filterStudents(this.value)" />
+          </div>
+          <select class="btn btn-ghost btn-sm" style="font-size:0.82rem" onchange="filterStudents()">
+            <option>All Faculties</option>
+            <option>Engineering</option>
+            <option>Agriculture</option>
+            <option>Science</option>
+            <option>Social Sciences</option>
+          </select>
+          <select class="btn btn-ghost btn-sm" style="font-size:0.82rem">
+            <option>All Status</option>
+            <option>Fully Paid</option>
+            <option>Partial</option>
+            <option>Outstanding</option>
+          </select>
+          <button class="btn btn-secondary btn-sm">
+            <i class="fas fa-download"></i> Export
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" style="accent-color:var(--green-600)" /></th>
+                <th>Student ID</th>
+                <th>Full Name</th>
+                <th>Faculty</th>
+                <th>Level</th>
+                <th>Total Fees</th>
+                <th>Paid</th>
+                <th>Balance</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsBody"><!-- JS --></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;font-size:0.82rem;color:var(--gray-400)">
+          <span>Showing 1–10 of 8,000 students</span>
+          <div style="display:flex;gap:0.5rem">
+            <button class="btn btn-ghost btn-sm">← Prev</button>
+            <button class="btn btn-ghost btn-sm">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PAYMENTS ═══════════ -->
+    <div id="admin-payments" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">Payment Transactions</h2>
+          <p style="font-size:0.85rem;color:var(--gray-400)">All payment records</p>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filter</button>
+          <button class="btn btn-primary btn-sm" onclick="showToast('Exporting transactions…','success')">
+            <i class="fas fa-file-excel"></i> Export Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+        <div class="stat-card" style="padding:1rem">
+          <div class="stat-label" style="margin-bottom:0.4rem">Today</div>
+          <div class="stat-value" style="font-size:1.3rem">SLL 42.5M</div>
+          <div style="font-size:0.75rem;color:var(--green-600);margin-top:0.25rem">↑ 143 transactions</div>
+        </div>
+        <div class="stat-card" style="padding:1rem">
+          <div class="stat-label" style="margin-bottom:0.4rem">This Week</div>
+          <div class="stat-value" style="font-size:1.3rem">SLL 198M</div>
+          <div style="font-size:0.75rem;color:var(--green-600);margin-top:0.25rem">↑ 724 transactions</div>
+        </div>
+        <div class="stat-card amber" style="padding:1rem">
+          <div class="stat-label" style="margin-bottom:0.4rem">Pending</div>
+          <div class="stat-value" style="font-size:1.3rem">23</div>
+          <div style="font-size:0.75rem;color:var(--amber);margin-top:0.25rem">Requires review</div>
+        </div>
+        <div class="stat-card" style="padding:1rem;border-top-color:var(--red)">
+          <div class="stat-label" style="margin-bottom:0.4rem">Failed</div>
+          <div class="stat-value" style="font-size:1.3rem;color:var(--red)">7</div>
+          <div style="font-size:0.75rem;color:var(--red);margin-top:0.25rem">Need attention</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="filter-bar">
+          <div class="search-wrap" style="max-width:280px">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search transactions…" />
+          </div>
+          <input type="date" class="btn btn-ghost btn-sm" style="font-size:0.82rem;padding:0.45rem 0.75rem" />
+          <input type="date" class="btn btn-ghost btn-sm" style="font-size:0.82rem;padding:0.45rem 0.75rem" />
+          <select class="btn btn-ghost btn-sm" style="font-size:0.82rem">
+            <option>All Methods</option>
+            <option>Orange Money</option>
+            <option>Africell Money</option>
+            <option>Bank Transfer</option>
+          </select>
+          <select class="btn btn-ghost btn-sm" style="font-size:0.82rem">
+            <option>All Status</option>
+            <option>Paid</option>
+            <option>Pending</option>
+            <option>Failed</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ref No.</th>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Fee Category</th>
+                <th>Amount (SLL)</th>
+                <th>Method</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsBody"><!-- JS --></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;font-size:0.82rem;color:var(--gray-400)">
+          <span>Showing 1–15 of 3,421 transactions</span>
+          <div style="display:flex;gap:0.5rem">
+            <button class="btn btn-ghost btn-sm">← Prev</button>
+            <button class="btn btn-ghost btn-sm">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ FEE STRUCTURE ═══════════ -->
+    <div id="admin-fees" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">Fee Structure</h2>
+          <p style="font-size:0.85rem;color:var(--gray-400)">Manage fee categories and amounts</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openFeeModal()">
+          <i class="fas fa-plus"></i> Add Fee Category
+        </button>
+      </div>
+
+      <div class="content-grid-3">
+        <div class="card animate-fadeup" onclick="this.style.borderColor='var(--green-400)'" style="cursor:pointer;transition:border-color 0.2s">
+          <div class="card-header"><div class="card-title">Tuition Fees</div><span class="badge badge-green">Active</span></div>
+          <div class="card-body">
+            <div class="fee-row"><span class="fee-name">Engineering</span><span class="fee-amount">SLL 3,000,000</span></div>
+            <div class="fee-row"><span class="fee-name">Agriculture</span><span class="fee-amount">SLL 2,400,000</span></div>
+            <div class="fee-row"><span class="fee-name">Science</span><span class="fee-amount">SLL 2,600,000</span></div>
+            <div class="fee-row"><span class="fee-name">Social Sciences</span><span class="fee-amount">SLL 2,200,000</span></div>
+          </div>
+          <div class="card-footer"><button class="btn btn-secondary btn-sm btn-full">Edit Amounts</button></div>
+        </div>
+
+        <div class="card animate-fadeup" style="cursor:pointer;transition:border-color 0.2s">
+          <div class="card-header"><div class="card-title">Accommodation</div><span class="badge badge-green">Active</span></div>
+          <div class="card-body">
+            <div class="fee-row"><span class="fee-name">Single Room</span><span class="fee-amount">SLL 900,000</span></div>
+            <div class="fee-row"><span class="fee-name">Shared Room</span><span class="fee-amount">SLL 600,000</span></div>
+            <div class="fee-row"><span class="fee-name">No Accommodation</span><span class="fee-amount">SLL 0</span></div>
+          </div>
+          <div class="card-footer"><button class="btn btn-secondary btn-sm btn-full">Edit Amounts</button></div>
+        </div>
+
+        <div class="card animate-fadeup" style="cursor:pointer;transition:border-color 0.2s">
+          <div class="card-header"><div class="card-title">Other Fees</div><span class="badge badge-green">Active</span></div>
+          <div class="card-body">
+            <div class="fee-row"><span class="fee-name">Exam Fees</span><span class="fee-amount">SLL 200,000</span></div>
+            <div class="fee-row"><span class="fee-name">Lab Fees</span><span class="fee-amount">SLL 300,000</span></div>
+            <div class="fee-row"><span class="fee-name">Student Union</span><span class="fee-amount">SLL 100,000</span></div>
+            <div class="fee-row"><span class="fee-name">ICT Fee</span><span class="fee-amount">SLL 150,000</span></div>
+          </div>
+          <div class="card-footer"><button class="btn btn-secondary btn-sm btn-full">Edit Amounts</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ REPORTS ═══════════ -->
+    <div id="admin-reports" style="display:none">
+      <div style="margin-bottom:1.5rem">
+        <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">Reports & Analytics</h2>
+        <p style="font-size:0.85rem;color:var(--gray-400)">Generate and download financial reports</p>
+      </div>
+
+      <div class="content-grid-3" style="margin-bottom:1.5rem">
+        <div class="card animate-fadeup" style="cursor:pointer" onclick="showToast('Generating report…','success')">
+          <div class="card-body" style="text-align:center;padding:2rem">
+            <div style="font-size:2.5rem;color:var(--green-500);margin-bottom:1rem">📊</div>
+            <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:600;margin-bottom:0.5rem">Fee Collection Report</div>
+            <div style="font-size:0.82rem;color:var(--gray-400);margin-bottom:1.25rem">Detailed collection by faculty and semester</div>
+            <button class="btn btn-primary btn-sm btn-full"><i class="fas fa-download"></i> Download PDF</button>
+          </div>
+        </div>
+        <div class="card animate-fadeup" style="cursor:pointer" onclick="showToast('Generating report…','success')">
+          <div class="card-body" style="text-align:center;padding:2rem">
+            <div style="font-size:2.5rem;color:var(--amber);margin-bottom:1rem">📋</div>
+            <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:600;margin-bottom:0.5rem">Outstanding Balances</div>
+            <div style="font-size:0.82rem;color:var(--gray-400);margin-bottom:1.25rem">Students with unpaid fees by department</div>
+            <button class="btn btn-secondary btn-sm btn-full"><i class="fas fa-download"></i> Download Excel</button>
+          </div>
+        </div>
+        <div class="card animate-fadeup" style="cursor:pointer" onclick="showToast('Generating report…','success')">
+          <div class="card-body" style="text-align:center;padding:2rem">
+            <div style="font-size:2.5rem;color:var(--blue);margin-bottom:1rem">📈</div>
+            <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:600;margin-bottom:0.5rem">Payment Trends</div>
+            <div style="font-size:0.82rem;color:var(--gray-400);margin-bottom:1.25rem">Year-over-year comparison report</div>
+            <button class="btn btn-secondary btn-sm btn-full"><i class="fas fa-download"></i> Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card animate-fadeup">
+        <div class="card-header">
+          <div class="card-title">Custom Report Generator</div>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem">
+            <div class="form-group" style="margin:0">
+              <label>Report Type</label>
+              <select>
+                <option>Fee Collection</option>
+                <option>Payment History</option>
+                <option>Outstanding Fees</option>
+                <option>Student Summary</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Date From</label>
+              <input type="date" />
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Date To</label>
+              <input type="date" />
+            </div>
+          </div>
+          <div style="display:flex;gap:0.75rem">
+            <button class="btn btn-primary" onclick="showToast('Report generated!','success')">
+              <i class="fas fa-file-chart-line"></i> Generate Report
+            </button>
+            <button class="btn btn-ghost"><i class="fas fa-times"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ SETTINGS ═══════════ -->
+    <div id="admin-settings" style="display:none">
+      <div style="margin-bottom:1.5rem">
+        <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:var(--dark)">System Settings</h2>
+      </div>
+      <div class="content-grid">
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <div class="card animate-fadeup">
+            <div class="card-header"><div class="card-title">Academic Session</div></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Current Academic Year</label>
+                <input type="text" value="2024/2025" />
+              </div>
+              <div class="form-group">
+                <label>Current Semester</label>
+                <select><option>Semester 1</option><option>Semester 2</option></select>
+              </div>
+              <div class="form-group">
+                <label>Fee Payment Deadline</label>
+                <input type="date" value="2025-03-31" />
+              </div>
+              <button class="btn btn-primary" onclick="showToast('Settings saved!','success')">
+                <i class="fas fa-save"></i> Save Settings
+              </button>
+            </div>
+          </div>
+
+          <div class="card animate-fadeup">
+            <div class="card-header"><div class="card-title">SMS / Email Notifications</div></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="checkbox-wrap" style="color:var(--dark);font-size:0.9rem">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--green-600)" />
+                  Enable SMS reminders for outstanding fees
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-wrap" style="color:var(--dark);font-size:0.9rem">
+                  <input type="checkbox" checked style="width:16px;height:16px;accent-color:var(--green-600)" />
+                  Send email receipt on payment
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-wrap" style="color:var(--dark);font-size:0.9rem">
+                  <input type="checkbox" style="width:16px;height:16px;accent-color:var(--green-600)" />
+                  Send weekly collection summary to admin
+                </label>
+              </div>
+              <button class="btn btn-secondary" onclick="showToast('Notification settings saved!','success')">
+                <i class="fas fa-save"></i> Save
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <div class="card animate-fadeup">
+            <div class="card-header"><div class="card-title">System Info</div></div>
+            <div class="card-body">
+              <div class="fee-row"><span class="fee-name">System Version</span><span class="text-mono" style="font-size:0.85rem">v1.2.0</span></div>
+              <div class="fee-row"><span class="fee-name">Database</span><span style="font-size:0.85rem">PostgreSQL 15</span></div>
+              <div class="fee-row"><span class="fee-name">Last Backup</span><span style="font-size:0.85rem;color:var(--green-600)">Today, 06:00</span></div>
+              <div class="fee-row"><span class="fee-name">Server Status</span><span class="badge badge-green badge-dot">Online</span></div>
+            </div>
+          </div>
+
+          <div class="card animate-fadeup">
+            <div class="card-header"><div class="card-title">Admin Users</div></div>
+            <div class="card-body">
+              <div class="tx-item" style="padding:0.75rem 0;border-bottom:1px solid var(--gray-100)">
+                <div class="user-avatar" style="width:34px;height:34px;font-size:0.85rem;background:var(--green-600)">FO</div>
+                <div class="tx-info">
+                  <div class="tx-name">Finance Officer</div>
+                  <div class="tx-meta">finance@njala.edu.sl</div>
+                </div>
+                <span class="badge badge-green">Admin</span>
+              </div>
+              <div class="tx-item" style="padding:0.75rem 0">
+                <div class="user-avatar" style="width:34px;height:34px;font-size:0.85rem;background:var(--blue)">RO</div>
+                <div class="tx-info">
+                  <div class="tx-name">Registry Officer</div>
+                  <div class="tx-meta">registry@njala.edu.sl</div>
+                </div>
+                <span class="badge badge-blue">Staff</span>
+              </div>
+              <button class="btn btn-ghost btn-sm btn-full" style="margin-top:0.75rem">
+                <i class="fas fa-user-plus"></i> Add Admin User
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addStudentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Student</div>
+      <div class="modal-close" onclick="document.getElementById('addStudentModal').classList.remove('open')"><i class="fas fa-times"></i></div>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="form-group"><label>First Name</label><input type="text" placeholder="First name" /></div>
+        <div class="form-group"><label>Last Name</label><input type="text" placeholder="Last name" /></div>
+      </div>
+      <div class="form-group"><label>Student ID</label><input type="text" placeholder="NJU/2024/XXXX" /></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="student@njala.edu.sl" /></div>
+      <div class="form-group"><label>Phone</label><input type="tel" placeholder="+232 76 000 000" /></div>
+      <div class="form-group"><label>Faculty</label>
+        <select>
+          <option>Faculty of Agriculture</option>
+          <option>Faculty of Engineering</option>
+          <option>Faculty of Science</option>
+          <option>Faculty of Social Sciences</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Level</label>
+        <select><option>100</option><option>200</option><option>300</option><option>400</option><option>500</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('addStudentModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="addStudent()"><i class="fas fa-user-plus"></i> Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ── Admin page switch ──
+  function adminPage(page, el) {
+    document.querySelectorAll('[id^="admin-"]').forEach(p => p.style.display = 'none');
+    document.getElementById('admin-' + page).style.display = 'block';
+    document.querySelectorAll('.admin-nav-item').forEach(a => a.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
+
+  function openAddStudentModal() {
+    document.getElementById('addStudentModal').classList.add('open');
+  }
+
+  function openFeeModal() {
+    showToast('Fee editor coming soon.', 'success');
+  }
+
+  function addStudent() {
+    document.getElementById('addStudentModal').classList.remove('open');
+    showToast('Student added successfully!', 'success');
+  }
+
+  function showToast(msg, type = 'success') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icons = { success:'fa-check-circle', error:'fa-times-circle', warning:'fa-exclamation-triangle' };
+    t.innerHTML = `<i class="fas ${icons[type]||'fa-info-circle'}"></i>${msg}`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // ── Render admin chart ──
+  const months  = ['Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const amounts = [95, 142, 88, 210, 74, 130, 58];
+  const maxA    = Math.max(...amounts);
+
+  const chartEl  = document.getElementById('adminChart');
+  const labelEl  = document.getElementById('adminChartLabels');
+
+  months.forEach((m, i) => {
+    const col = document.createElement('div');
+    col.style.cssText = `flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px`;
+    const bar = document.createElement('div');
+    bar.style.cssText = `width:100%;border-radius:4px 4px 0 0;background:var(--green-500);min-height:4px;position:relative`;
+    bar.title = `${m}: SLL ${amounts[i]}M`;
+    const tipEl = document.createElement('span');
+    tipEl.style.cssText = `position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:0.65rem;font-weight:700;color:var(--gray-500);white-space:nowrap`;
+    tipEl.textContent = `${amounts[i]}M`;
+    bar.appendChild(tipEl);
+    col.appendChild(bar);
+    chartEl.appendChild(col);
+
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `flex:1;text-align:center;font-size:0.7rem;color:var(--gray-400)`;
+    lbl.textContent = m;
+    labelEl.appendChild(lbl);
+
+    setTimeout(() => {
+      bar.style.height = `${(amounts[i] / maxA) * 100}%`;
+    }, 100 + i * 60);
+  });
+
+  // ── Faculty bars ──
+  const faculties = [
+    { name:'Engineering', pct:82, color:'var(--green-500)' },
+    { name:'Agriculture',  pct:76, color:'var(--gold)' },
+    { name:'Science',      pct:88, color:'var(--blue)' },
+    { name:'Soc. Sciences',pct:71, color:'var(--amber)' },
+  ];
+
+  const fb = document.getElementById('facultyBars');
+  faculties.forEach(f => {
+    fb.innerHTML += `
+      <div class="semester-progress" style="margin-bottom:0.75rem">
+        <div class="sp-header">
+          <span class="sp-name" style="font-size:0.8rem">${f.name}</span>
+          <span class="sp-amount">${f.pct}%</span>
+        </div>
+        <div class="progress">
+          <div class="fill" style="width:${f.pct}%;background:${f.color};transition:width 1s ease"></div>
+        </div>
+      </div>`;
+  });
+
+  // ── Populate tables ──
+  const adminStudents = [
+    ['NJU/2021/0042','Mohamed Koroma','Engineering','300','4,200,000','2,940,000','1,260,000','Partial'],
+    ['NJU/2022/0118','Fatmata Sesay','Agriculture','200','3,600,000','3,600,000','0','Paid'],
+    ['NJU/2023/0065','Ibrahim Kamara','Science','100','3,800,000','1,200,000','2,600,000','Outstanding'],
+    ['NJU/2021/0091','Mariama Conteh','Social Sciences','400','3,300,000','3,300,000','0','Paid'],
+    ['NJU/2022/0207','Alpha Bangura','Engineering','200','4,200,000','2,100,000','2,100,000','Partial'],
+  ];
+
+  const sb = document.getElementById('studentsBody');
+  adminStudents.forEach(s => {
+    const statusMap = { Paid:'badge-green', Partial:'badge-amber', Outstanding:'badge-red' };
+    sb.innerHTML += `<tr>
+      <td><input type="checkbox" style="accent-color:var(--green-600)" /></td>
+      <td class="td-mono">${s[0]}</td>
+      <td><strong>${s[1]}</strong></td>
+      <td>${s[2]}</td>
+      <td>${s[3]}L</td>
+      <td class="td-mono">${s[4]}</td>
+      <td class="td-mono">${s[5]}</td>
+      <td class="td-mono" style="color:${s[7]==='Paid'?'var(--green-600)':'var(--red)'}"><strong>${s[6]}</strong></td>
+      <td><span class="badge ${statusMap[s[7]]} badge-dot">${s[7]}</span></td>
+      <td><div style="display:flex;gap:0.4rem">
+        <button class="btn btn-ghost btn-sm" title="View" onclick="showToast('Viewing ${s[1]}')"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-ghost btn-sm" title="Edit"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-ghost btn-sm" title="Send SMS" onclick="showToast('SMS sent to ${s[1]}','success')"><i class="fas fa-sms"></i></button>
+      </div></td>
+    </tr>`;
+  });
+
+  // Recent payments admin
+  const recentPays = [
+    ['NJU/2021/0042','Mohamed Koroma','Engineering','500,000','Orange Money','Today, 10:24','Paid'],
+    ['NJU/2022/0118','Fatmata Sesay','Agriculture','400,000','Africell Money','Today, 09:15','Paid'],
+    ['NJU/2023/0065','Ibrahim Kamara','Science','200,000','Bank Transfer','Yesterday','Pending'],
+    ['NJU/2021/0099','Alimamy Turay','Engineering','1,500,000','Orange Money','Yesterday','Paid'],
+    ['NJU/2023/0211','Kadiatu Bangura','Soc. Sciences','150,000','Africell Money','2 days ago','Failed'],
+  ];
+
+  const arb = document.getElementById('adminRecentBody');
+  recentPays.forEach((p, i) => {
+    const sm = { Paid:'badge-green', Pending:'badge-amber', Failed:'badge-red' };
+    arb.innerHTML += `<tr>
+      <td class="td-mono">TXN-2025-${String(1000+i).padStart(4,'0')}</td>
+      <td class="td-mono">${p[0]}</td>
+      <td><strong>${p[1]}</strong></td>
+      <td>${p[2]}</td>
+      <td class="td-mono"><strong>SLL ${p[3]}</strong></td>
+      <td><span class="badge badge-gray">${p[4]}</span></td>
+      <td style="font-size:0.8rem;color:var(--gray-400)">${p[6]}</td>
+      <td><span class="badge ${sm[p[6]]} badge-dot">${p[6]}</span></td>
+      <td><div style="display:flex;gap:0.4rem">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Receipt for ${p[1]} viewed','success')"><i class="fas fa-receipt"></i></button>
+        ${p[6]==='Pending'?`<button class="btn btn-primary btn-sm" onclick="showToast('Payment approved!','success')"><i class="fas fa-check"></i></button>`:''}
+      </div></td>
+    </tr>`;
+  });
+
+  // Payments table
+  const pb = document.getElementById('paymentsBody');
+  recentPays.forEach((p, i) => {
+    const sm2 = { Paid:'badge-green', Pending:'badge-amber', Failed:'badge-red' };
+    pb.innerHTML += `<tr>
+      <td class="td-mono">TXN-2025-${String(1000+i).padStart(4,'0')}</td>
+      <td class="td-mono">${p[0]}</td>
+      <td>${p[1]}</td>
+      <td>Tuition Fee</td>
+      <td class="td-mono">SLL ${p[3]}</td>
+      <td>${p[4]}</td>
+      <td style="font-size:0.8rem;color:var(--gray-400)">${p[6]}</td>
+      <td><span class="badge ${sm2[p[6]]} badge-dot">${p[6]}</span></td>
+      <td><div style="display:flex;gap:0.4rem">
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Receipt downloaded!','success')"><i class="fas fa-download"></i></button>
+      </div></td>
+    </tr>`;
+  });
+
+  function filterStudents(v) { /* search hook */ }
+</script>
+</body>
+</html>

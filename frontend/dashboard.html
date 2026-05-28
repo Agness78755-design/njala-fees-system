@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Njala Fees Portal</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Chart area placeholder */
+    .chart-area {
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 0 0.5rem;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar-fill {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: var(--green-500);
+      transition: height 1s ease;
+      min-height: 4px;
+      position: relative;
+    }
+
+    .bar-fill.gold { background: var(--gold); }
+    .bar-fill .tip {
+      position: absolute;
+      top: -22px; left: 50%; transform: translateX(-50%);
+      font-size: 0.65rem; font-weight: 700; color: var(--gray-500);
+      white-space: nowrap;
+    }
+
+    .bar-label {
+      font-size: 0.68rem;
+      color: var(--gray-400);
+      text-align: center;
+    }
+
+    .chart-legend {
+      display: flex; gap: 1rem; align-items: center;
+      font-size: 0.75rem; color: var(--gray-500);
+      margin-bottom: 0.75rem;
+    }
+
+    .chart-legend span { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px; display: inline-block;
+    }
+
+    /* Semester progress */
+    .semester-progress { margin-bottom: 1.25rem; }
+    .sp-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .sp-name { font-size: 0.85rem; font-weight: 600; color: var(--dark); }
+    .sp-amount { font-family: var(--font-mono); font-size: 0.82rem; color: var(--gray-500); }
+
+    /* Notification item */
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.9rem 1.5rem;
+      border-bottom: 1px solid var(--gray-100);
+      cursor: pointer; transition: background var(--transition);
+    }
+
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--green-50); }
+
+    .notif-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%; background: var(--green-500);
+      margin-top: 6px; flex-shrink: 0;
+    }
+
+    .notif-dot.read { background: transparent; border: 1.5px solid var(--gray-300); }
+
+    .notif-text { font-size: 0.85rem; color: var(--dark); line-height: 1.5; }
+    .notif-time { font-size: 0.72rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* payment method card */
+    .pay-method {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem; border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md); cursor: pointer;
+      transition: all var(--transition); margin-bottom: 0.75rem;
+    }
+
+    .pay-method:hover { border-color: var(--green-400); background: var(--green-50); }
+    .pay-method.selected { border-color: var(--green-600); background: var(--green-50); }
+
+    .pay-method-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+
+    .pay-method-info .name { font-size: 0.9rem; font-weight: 600; color: var(--dark); }
+    .pay-method-info .desc { font-size: 0.78rem; color: var(--gray-400); }
+
+    .pay-method .check {
+      margin-left: auto;
+      width: 20px; height: 20px;
+      border-radius: 50%; border: 2px solid var(--gray-300);
+      display: flex; align-items: center; justify-content: center;
+      color: transparent; font-size: 0.6rem;
+    }
+
+    .pay-method.selected .check {
+      background: var(--green-600); border-color: var(--green-600);
+      color: var(--white);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">N</div>
+        <div class="logo-text">
+          <div class="logo-title">Njala University</div>
+          <div class="logo-subtitle">Fees Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarAvatar">MK</div>
+      <div class="user-info">
+        <div class="name" id="sidebarName">Mohamed Koroma</div>
+        <div class="role" id="sidebarRole">NJU/2021/0042</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Menu</div>
+
+      <a href="dashboard.html" class="nav-item active" id="nav-dashboard">
+        <i class="fas fa-th-large nav-icon"></i> Dashboard
+      </a>
+      <a href="#" class="nav-item" onclick="showPage('fees')" id="nav-fees">
+        <i class="fas fa-file-invoice-dollar nav-icon"></i> My Fees
+      </a>
+      <a href="#" class="nav-item" onclick="showPage('payments')" id="nav-payments">
+        <i class="fas fa-credit-card nav-icon"></i> Make Payment
+      </a>
+      <a href="#" class="nav-item" onclick="showPage('history')" id="nav-history">
+        <i class="fas fa-history nav-icon"></i> Payment History
+      </a>
+      <a href="#" class="nav-item" onclick="showPage('receipts')" id="nav-receipts">
+        <i class="fas fa-receipt nav-icon"></i> Receipts
+      </a>
+
+      <div class="nav-section-label">Account</div>
+
+      <a href="#" class="nav-item" onclick="showPage('profile')" id="nav-profile">
+        <i class="fas fa-user-circle nav-icon"></i> My Profile
+      </a>
+      <a href="#" class="nav-item" id="nav-notif">
+        <i class="fas fa-bell nav-icon"></i> Notifications
+        <span class="nav-badge">3</span>
+      </a>
+      <a href="#" class="nav-item" onclick="showPage('settings')" id="nav-settings">
+        <i class="fas fa-cog nav-icon"></i> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="nav-item" onclick="logout()" style="color:rgba(255,100,100,0.8)">
+        <i class="fas fa-sign-out-alt nav-icon"></i> Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbarTitle">Overview</div>
+        <div class="topbar-subtitle" id="topbarSub">Academic Year 2024/2025</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search transactions…" />
+        </div>
+        <button class="topbar-btn" title="Notifications" onclick="showPage('notif')">
+          <i class="fas fa-bell"></i>
+          <span class="badge"></span>
+        </button>
+        <button class="topbar-btn" title="Settings" onclick="showPage('settings')">
+          <i class="fas fa-cog"></i>
+        </button>
+        <a href="login.html">
+          <div class="topbar-btn" title="Sign out">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+        </a>
+      </div>
+    </header>
+
+    <!-- ═══════════════════ PAGE: DASHBOARD ═══════════════════ -->
+    <div id="page-dashboard" class="page-content">
+
+      <!-- Fee Summary Banner -->
+      <div class="fee-summary-card animate-fadeup">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:1.5rem;align-items:center;position:relative;z-index:1">
+          <div>
+            <div class="label">Outstanding Balance</div>
+            <div class="amount"><span class="currency">SLL</span><span id="balanceAmount">1,260,000</span></div>
+            <div style="font-size:0.8rem;color:var(--green-300);margin-top:0.25rem">
+              <i class="fas fa-info-circle"></i> Due by <strong>31 March 2025</strong>
+            </div>
+            <div class="progress-label">
+              <span>Paid: SLL 2,940,000</span>
+              <span>70% complete</span>
+            </div>
+            <div class="progress-bar"><div class="fill" id="feeProgressBar" style="width:70%"></div></div>
+          </div>
+          <div>
+            <div class="label">Academic Session</div>
+            <div style="font-size:1.2rem;font-weight:700;color:var(--white)">2024/2025</div>
+            <div style="font-size:0.78rem;color:var(--green-200)">Semester 1 of 2</div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn btn-gold" onclick="openPayModal()">
+              <i class="fas fa-paper-plane"></i> Pay Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon gold"><i class="fas fa-coins"></i></div>
+            <span class="stat-trend up">↑ On track</span>
+          </div>
+          <div class="stat-value">SLL 4.2M</div>
+          <div class="stat-label">Total Annual Fees</div>
+        </div>
+        <div class="stat-card amber animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon amber"><i class="fas fa-exclamation-triangle"></i></div>
+            <span class="stat-trend down">Due Soon</span>
+          </div>
+          <div class="stat-value">SLL 1.26M</div>
+          <div class="stat-label">Outstanding Balance</div>
+        </div>
+        <div class="stat-card animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <span class="stat-trend up">↑ 70%</span>
+          </div>
+          <div class="stat-value">SLL 2.94M</div>
+          <div class="stat-label">Total Paid</div>
+        </div>
+        <div class="stat-card blue animate-fadeup">
+          <div class="stat-header">
+            <div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
+            <span class="stat-trend flat">This year</span>
+          </div>
+          <div class="stat-value">7</div>
+          <div class="stat-label">Transactions Made</div>
+        </div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="content-grid">
+
+        <!-- Payment Chart -->
+        <div class="card animate-fadeup">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Payment Activity</div>
+              <div class="card-subtitle">Monthly breakdown — 2024/2025</div>
+            </div>
+            <select class="btn btn-ghost btn-sm" style="padding:0.4rem 0.75rem;font-size:0.8rem">
+              <option>This Year</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="chart-legend">
+              <span><span class="legend-dot" style="background:var(--green-500)"></span>Paid</span>
+              <span><span class="legend-dot" style="background:var(--gold)"></span>Outstanding</span>
+            </div>
+            <div class="chart-area" id="paymentChart">
+              <!-- Generated by JS -->
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-top:0.5rem" id="chartLabels"></div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+
+          <!-- Quick Actions -->
+          <div class="card animate-fadeup">
+            <div class="card-header">
+              <div class="card-title">Quick Actions</div>
+            </div>
+            <div class="card-body">
+              <div class="quick-actions">
+                <div class="quick-action" onclick="openPayModal()">
+                  <div class="qa-icon"><i class="fas fa-paper-plane"></i></div>
+                  <span>Pay Fees</span>
+                </div>
+                <div class="quick-action" onclick="showPage('history')">
+                  <div class="qa-icon"><i class="fas fa-history"></i></div>
+                  <span>History</span>
+                </div>
+                <div class="quick-action" onclick="downloadReceipt()">
+                  <div class="qa-icon"><i class="fas fa-download"></i></div>
+                  <span>Receipt</span>
+                </div>
+                <div class="quick-action" onclick="showPage('profile')">
+                  <div class="qa-icon"><i class="fas fa-user-edit"></i></div>
+                  <span>Profile</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="card animate-fadeup">
+            <div class="card-header">
+              <div class="card-title">Notifications</div>
+              <span class="badge badge-red">3 new</span>
+            </div>
+            <div class="tx-list">
+              <div class="notif-item">
+                <div class="notif-dot"></div>
+                <div>
+                  <div class="notif-text">Fee payment deadline extended to 31 March 2025.</div>
+                  <div class="notif-time">2 hours ago</div>
+                </div>
+              </div>
+              <div class="notif-item">
+                <div class="notif-dot"></div>
+                <div>
+                  <div class="notif-text">Your SLL 500,000 payment was confirmed.</div>
+                  <div class="notif-time">Yesterday, 3:42 PM</div>
+                </div>
+              </div>
+              <div class="notif-item">
+                <div class="notif-dot"></div>
+                <div>
+                  <div class="notif-text">Reminder: Exam clearance requires full fee payment.</div>
+                  <div class="notif-time">3 days ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Fee Breakdown + Recent Transactions -->
+      <div class="content-grid">
+
+        <!-- Fee Breakdown -->
+        <div class="card animate-fadeup">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Fee Breakdown</div>
+              <div class="card-subtitle">2024/2025 Academic Year</div>
+            </div>
+            <span class="badge badge-green badge-dot">Active</span>
+          </div>
+          <div class="card-body">
+            <div class="tabs">
+              <button class="tab-btn active" onclick="switchFeeTab('sem1',this)">Semester 1</button>
+              <button class="tab-btn" onclick="switchFeeTab('sem2',this)">Semester 2</button>
+            </div>
+            <div id="fee-sem1">
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-book" style="color:var(--green-500);margin-right:8px"></i>Tuition Fee</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-green badge-dot">Paid</span>
+                  <div class="fee-amount">SLL 1,500,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-home" style="color:var(--blue);margin-right:8px"></i>Accommodation</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-green badge-dot">Paid</span>
+                  <div class="fee-amount">SLL 400,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-flask" style="color:var(--amber);margin-right:8px"></i>Lab Fees</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-green badge-dot">Paid</span>
+                  <div class="fee-amount">SLL 150,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-clipboard-check" style="color:var(--red);margin-right:8px"></i>Exam Fees</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 100,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-users" style="color:var(--green-400);margin-right:8px"></i>Student Union</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 50,000</div>
+                </div>
+              </div>
+              <div class="fee-row" style="border-top:2px solid var(--gray-200);margin-top:0.5rem;padding-top:1rem">
+                <div class="fee-name" style="font-weight:700;color:var(--dark)">Semester 1 Total</div>
+                <div class="fee-amount" style="font-size:1.05rem;color:var(--green-700)">SLL 2,200,000</div>
+              </div>
+            </div>
+            <div id="fee-sem2" style="display:none">
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-book" style="color:var(--green-500);margin-right:8px"></i>Tuition Fee</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 1,500,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-home" style="color:var(--blue);margin-right:8px"></i>Accommodation</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 400,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-flask" style="color:var(--amber);margin-right:8px"></i>Lab Fees</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 150,000</div>
+                </div>
+              </div>
+              <div class="fee-row">
+                <div class="fee-name"><i class="fas fa-clipboard-check" style="color:var(--red);margin-right:8px"></i>Exam Fees</div>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <span class="badge badge-amber badge-dot">Pending</span>
+                  <div class="fee-amount">SLL 100,000</div>
+                </div>
+              </div>
+              <div class="fee-row" style="border-top:2px solid var(--gray-200);margin-top:0.5rem;padding-top:1rem">
+                <div class="fee-name" style="font-weight:700;color:var(--dark)">Semester 2 Total</div>
+                <div class="fee-amount" style="font-size:1.05rem;color:var(--green-700)">SLL 2,000,000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card animate-fadeup">
+          <div class="card-header">
+            <div class="card-title">Recent Transactions</div>
+            <a href="#" onclick="showPage('history')" style="font-size:0.82rem;color:var(--green-600);font-weight:500">View all</a>
+          </div>
+          <div class="tx-list" id="txList">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page-dashboard -->
+
+    <!-- ═══════════════════ PAGE: MY FEES ═══════════════════ -->
+    <div id="page-fees" class="page-content" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">My Fee Schedule</div>
+            <div class="card-subtitle">Full breakdown for Academic Year 2024/2025</div>
+          </div>
+          <button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> Download PDF</button>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>You have outstanding fees of <strong>SLL 1,260,000</strong> due by 31 March 2025.</span>
+          </div>
+
+          <div class="semester-progress">
+            <div class="sp-header">
+              <span class="sp-name">Semester 1 Progress</span>
+              <span class="sp-amount">SLL 2,050,000 / SLL 2,200,000</span>
+            </div>
+            <div class="progress"><div class="fill" style="width:93%"></div></div>
+          </div>
+          <div class="semester-progress">
+            <div class="sp-header">
+              <span class="sp-name">Semester 2 Progress</span>
+              <span class="sp-amount">SLL 0 / SLL 2,000,000</span>
+            </div>
+            <div class="progress"><div class="fill" style="width:0%;background:var(--amber)"></div></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Fee Category</th>
+                <th>Semester</th>
+                <th>Amount (SLL)</th>
+                <th>Paid</th>
+                <th>Balance</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Tuition Fee</td><td>Sem 1</td><td class="text-mono">1,500,000</td><td class="text-mono">1,500,000</td><td class="text-mono">0</td><td>Dec 2024</td><td><span class="badge badge-green badge-dot">Paid</span></td></tr>
+              <tr><td>Accommodation</td><td>Sem 1</td><td class="text-mono">400,000</td><td class="text-mono">400,000</td><td class="text-mono">0</td><td>Dec 2024</td><td><span class="badge badge-green badge-dot">Paid</span></td></tr>
+              <tr><td>Lab Fees</td><td>Sem 1</td><td class="text-mono">150,000</td><td class="text-mono">150,000</td><td class="text-mono">0</td><td>Dec 2024</td><td><span class="badge badge-green badge-dot">Paid</span></td></tr>
+              <tr><td>Exam Fees</td><td>Sem 1</td><td class="text-mono">100,000</td><td class="text-mono">0</td><td class="text-mono">100,000</td><td>Mar 2025</td><td><span class="badge badge-amber badge-dot">Pending</span></td></tr>
+              <tr><td>Student Union</td><td>Sem 1</td><td class="text-mono">50,000</td><td class="text-mono">0</td><td class="text-mono">50,000</td><td>Mar 2025</td><td><span class="badge badge-amber badge-dot">Pending</span></td></tr>
+              <tr><td>Tuition Fee</td><td>Sem 2</td><td class="text-mono">1,500,000</td><td class="text-mono">0</td><td class="text-mono">1,500,000</td><td>May 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+              <tr><td>Accommodation</td><td>Sem 2</td><td class="text-mono">400,000</td><td class="text-mono">0</td><td class="text-mono">400,000</td><td>May 2025</td><td><span class="badge badge-gray">Upcoming</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE: PAYMENT HISTORY ═══════════════════ -->
+    <div id="page-history" class="page-content" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Payment History</div>
+            <div class="card-subtitle">All transactions for your account</div>
+          </div>
+          <div style="display:flex;gap:0.5rem">
+            <select class="btn btn-ghost btn-sm" style="font-size:0.8rem;padding:0.4rem 0.75rem">
+              <option>All Status</option>
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Failed</option>
+            </select>
+            <button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> Export</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="historyTable">
+            <thead>
+              <tr>
+                <th>Ref No.</th>
+                <th>Description</th>
+                <th>Method</th>
+                <th>Amount (SLL)</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="historyTbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE: MAKE PAYMENT ═══════════════════ -->
+    <div id="page-payments" class="page-content" style="display:none">
+      <div class="content-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Make a Payment</div>
+            <div class="card-subtitle">Pay your fees securely</div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Select Fee Category</label>
+              <select id="payFeeCategory">
+                <option value="">Choose fee to pay…</option>
+                <option value="100000">Exam Fees — SLL 100,000</option>
+                <option value="50000">Student Union — SLL 50,000</option>
+                <option value="1500000">Tuition Fee (Sem 2) — SLL 1,500,000</option>
+                <option value="400000">Accommodation (Sem 2) — SLL 400,000</option>
+                <option value="custom">Custom Amount</option>
+              </select>
+            </div>
+            <div class="form-group" id="customAmountGroup" style="display:none">
+              <label>Custom Amount (SLL)</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-coins icon"></i>
+                <input type="number" id="customAmount" placeholder="Enter amount" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+            </div>
+
+            <div class="pay-method selected" onclick="selectMethod(this,'orange')">
+              <div class="pay-method-icon" style="background:#fff3e0">🟠</div>
+              <div class="pay-method-info">
+                <div class="name">Orange Money</div>
+                <div class="desc">Pay via Orange Mobile Money</div>
+              </div>
+              <div class="check"><i class="fas fa-check"></i></div>
+            </div>
+
+            <div class="pay-method" onclick="selectMethod(this,'africell')">
+              <div class="pay-method-icon" style="background:#e3f2fd">🔵</div>
+              <div class="pay-method-info">
+                <div class="name">Africell Money</div>
+                <div class="desc">Pay via Africell Mobile Money</div>
+              </div>
+              <div class="check"><i class="fas fa-check"></i></div>
+            </div>
+
+            <div class="pay-method" onclick="selectMethod(this,'bank')">
+              <div class="pay-method-icon" style="background:var(--green-50)">🏦</div>
+              <div class="pay-method-info">
+                <div class="name">Bank Transfer</div>
+                <div class="desc">Sierra Leone Commercial Bank</div>
+              </div>
+              <div class="check"><i class="fas fa-check"></i></div>
+            </div>
+
+            <div class="form-group" style="margin-top:1.25rem">
+              <label>Phone Number (for Mobile Money)</label>
+              <div class="input-icon-wrap">
+                <i class="fas fa-phone icon"></i>
+                <input type="tel" id="payPhone" placeholder="+232 76 000 000" />
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-lg" style="margin-top:0.5rem" onclick="processPayment()">
+              <i class="fas fa-lock"></i> Proceed to Pay
+            </button>
+            <p style="text-align:center;font-size:0.75rem;color:var(--gray-400);margin-top:0.75rem">
+              <i class="fas fa-shield-alt"></i> Secured by 256-bit SSL encryption
+            </p>
+          </div>
+        </div>
+
+        <!-- Summary sidebar -->
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Payment Summary</div></div>
+            <div class="card-body">
+              <div class="fee-row">
+                <span class="fee-name">Fee Category</span>
+                <span id="summaryCategory" style="font-size:0.85rem;color:var(--gray-500)">—</span>
+              </div>
+              <div class="fee-row">
+                <span class="fee-name">Amount</span>
+                <span id="summaryAmount" class="fee-amount">SLL —</span>
+              </div>
+              <div class="fee-row">
+                <span class="fee-name">Payment Method</span>
+                <span id="summaryMethod" style="font-size:0.85rem;color:var(--gray-500)">Orange Money</span>
+              </div>
+              <div class="fee-row">
+                <span class="fee-name">Processing Fee</span>
+                <span style="font-size:0.85rem;color:var(--green-600)">Free</span>
+              </div>
+              <div class="fee-row" style="border-top:2px solid var(--gray-200);margin-top:0.5rem;padding-top:1rem">
+                <span class="fee-name" style="font-weight:700">Total</span>
+                <span id="summaryTotal" class="fee-amount" style="font-size:1.1rem">SLL —</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1.25rem">
+            <div class="card-header"><div class="card-title">Need Help?</div></div>
+            <div class="card-body">
+              <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:1rem">Contact the Finance Office for payment assistance:</p>
+              <a href="tel:+23222000000" class="btn btn-ghost btn-full btn-sm" style="margin-bottom:0.5rem">
+                <i class="fas fa-phone" style="color:var(--green-600)"></i> +232 22 000 000
+              </a>
+              <a href="mailto:finance@njala.edu.sl" class="btn btn-ghost btn-full btn-sm">
+                <i class="fas fa-envelope" style="color:var(--green-600)"></i> finance@njala.edu.sl
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE: PROFILE ═══════════════════ -->
+    <div id="page-profile" class="page-content" style="display:none">
+      <div class="content-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">My Profile</div>
+            <button class="btn btn-secondary btn-sm" id="editProfileBtn" onclick="toggleEditProfile()">
+              <i class="fas fa-edit"></i> Edit Profile
+            </button>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--gray-100)">
+              <div class="user-avatar" style="width:72px;height:72px;font-size:1.6rem;background:var(--green-600)">MK</div>
+              <div>
+                <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--dark)">Mohamed Koroma</div>
+                <div style="color:var(--gray-400);font-size:0.85rem">NJU/2021/0042 · Faculty of Engineering</div>
+                <div style="margin-top:0.5rem"><span class="badge badge-green badge-dot">Active Student</span></div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" value="Mohamed" disabled id="pFirst" />
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" value="Koroma" disabled id="pLast" />
+              </div>
+              <div class="form-group">
+                <label>Student ID</label>
+                <input type="text" value="NJU/2021/0042" disabled />
+              </div>
+              <div class="form-group">
+                <label>Level</label>
+                <input type="text" value="300 Level" disabled />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" value="m.koroma@student.njala.edu.sl" disabled id="pEmail" />
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" value="+232 76 123 456" disabled id="pPhone" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label>Faculty / Department</label>
+                <input type="text" value="Faculty of Engineering — Civil Engineering" disabled />
+              </div>
+            </div>
+
+            <div id="saveProfileBtn" style="display:none;margin-top:0.5rem">
+              <button class="btn btn-primary" onclick="saveProfile()">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Account Security</div></div>
+            <div class="card-body">
+              <button class="btn btn-ghost btn-full btn-sm" style="margin-bottom:0.75rem;justify-content:flex-start">
+                <i class="fas fa-key" style="color:var(--green-600)"></i> Change Password
+              </button>
+              <button class="btn btn-ghost btn-full btn-sm" style="justify-content:flex-start">
+                <i class="fas fa-mobile-alt" style="color:var(--green-600)"></i> Update Phone Number
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ PAGE: RECEIPTS ═══════════════════ -->
+    <div id="page-receipts" class="page-content" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">My Receipts</div>
+          <div style="font-size:0.85rem;color:var(--gray-400)">Download payment receipts</div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Receipt No.</th>
+                <th>Description</th>
+                <th>Amount (SLL)</th>
+                <th>Date</th>
+                <th>Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-mono">RCT-2024-0072</td>
+                <td>Tuition Fee — Sem 1</td>
+                <td class="td-mono">1,500,000</td>
+                <td>10 Sep 2024</td>
+                <td><button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> PDF</button></td>
+              </tr>
+              <tr>
+                <td class="td-mono">RCT-2024-0058</td>
+                <td>Accommodation — Sem 1</td>
+                <td class="td-mono">400,000</td>
+                <td>05 Sep 2024</td>
+                <td><button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> PDF</button></td>
+              </tr>
+              <tr>
+                <td class="td-mono">RCT-2024-0041</td>
+                <td>Lab Fees — Sem 1</td>
+                <td class="td-mono">150,000</td>
+                <td>01 Sep 2024</td>
+                <td><button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> PDF</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ PAYMENT MODAL ══ -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Quick Payment</div>
+        <div style="font-size:0.8rem;color:var(--gray-400);margin-top:2px">Secure payment processing</div>
+      </div>
+      <div class="modal-close" onclick="closePayModal()"><i class="fas fa-times"></i></div>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info" style="margin-bottom:1.25rem">
+        <i class="fas fa-info-circle"></i>
+        <span>Outstanding balance: <strong>SLL 1,260,000</strong></span>
+      </div>
+      <div class="form-group">
+        <label>Amount to Pay (SLL)</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-coins icon"></i>
+          <input type="number" id="modalAmount" placeholder="e.g. 500000" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select id="modalMethod">
+          <option>Orange Money</option>
+          <option>Africell Money</option>
+          <option>Bank Transfer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <div class="input-icon-wrap">
+          <i class="fas fa-phone icon"></i>
+          <input type="tel" id="modalPhone" placeholder="+232 76 000 000" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closePayModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitModalPayment()">
+        <i class="fas fa-lock"></i> Pay Now
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/payments.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Njala University — Fees Management System</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Landing-specific styles */
+    body { background: var(--green-900); color: var(--white); overflow-x: hidden; }
+
+    /* ── Nav ── */
+    .landing-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,36,18,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0 4rem; height: 68px;
+      display: flex; align-items: center; gap: 2rem;
+    }
+
+    .landing-nav .nav-logo {
+      display: flex; align-items: center; gap: 10px; flex: 1;
+    }
+
+    .landing-nav-links {
+      display: flex; align-items: center; gap: 0.25rem;
+    }
+
+    .landing-nav-links a {
+      padding: 0.5rem 1rem; border-radius: var(--radius-md);
+      font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.7);
+      transition: all var(--transition);
+    }
+
+    .landing-nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+
+    .landing-nav-cta { display: flex; gap: 0.75rem; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; padding: 5rem 4rem 4rem;
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(30,92,46,0.4) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.15) 0%, transparent 45%),
+        radial-gradient(ellipse at 60% 90%, rgba(58,138,78,0.2) 0%, transparent 50%);
+    }
+
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center; max-width: 1200px;
+      margin: 0 auto; width: 100%; position: relative; z-index: 1;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold); padding: 0.4rem 0.9rem; border-radius: 99px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 3.4rem; font-weight: 700; line-height: 1.15;
+      color: var(--white); margin-bottom: 1.25rem;
+    }
+
+    .hero h1 span { color: var(--gold); }
+
+    .hero p {
+      font-size: 1.1rem; color: rgba(255,255,255,0.65);
+      line-height: 1.75; margin-bottom: 2.5rem; max-width: 480px;
+    }
+
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .hero-card-stack {
+      position: relative;
+      height: 420px;
+    }
+
+    .hero-card {
+      position: absolute;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(8px);
+      padding: 1.5rem;
+    }
+
+    .hero-card.main {
+      inset: 0; z-index: 3;
+      background: rgba(15,51,25,0.8);
+    }
+
+    .hero-card.back1 {
+      bottom: -20px; left: 20px; right: -20px; top: 20px;
+      z-index: 1; background: rgba(255,255,255,0.03);
+    }
+
+    .hero-card.back2 {
+      bottom: -40px; left: 40px; right: -40px; top: 40px;
+      z-index: 0; background: rgba(255,255,255,0.015);
+    }
+
+    .hc-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .hc-title {
+      font-size: 0.75rem; font-weight: 600; color: var(--green-300);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+
+    .hc-badge {
+      background: var(--green-600); color: var(--white);
+      font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem;
+      border-radius: 99px;
+    }
+
+    .hc-amount {
+      font-family: var(--font-display); font-size: 2rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.3rem;
+    }
+
+    .hc-sub {
+      font-size: 0.78rem; color: var(--green-300); margin-bottom: 1.25rem;
+    }
+
+    .hc-progress { margin-bottom: 1.25rem; }
+    .hc-progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.75rem; color: rgba(255,255,255,0.5);
+      margin-bottom: 0.4rem;
+    }
+
+    .hc-fee-rows { display: flex; flex-direction: column; gap: 0.6rem; }
+    .hc-fee-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.05); border-radius: var(--radius-sm);
+    }
+
+    .hc-fee-row .n { font-size: 0.82rem; color: rgba(255,255,255,0.7); }
+    .hc-fee-row .a {
+      font-family: var(--font-mono); font-size: 0.82rem;
+      color: var(--white); font-weight: 600;
+    }
+
+    .hc-bottom {
+      margin-top: 1.25rem; display: flex; gap: 0.75rem;
+    }
+
+    /* ── Features ── */
+    .features-section {
+      padding: 5rem 4rem;
+      background: var(--green-900);
+      position: relative;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--green-400); margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      text-align: center;
+      font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.75rem;
+    }
+
+    .section-sub {
+      text-align: center; font-size: 1rem; color: rgba(255,255,255,0.5);
+      max-width: 560px; margin: 0 auto 3rem;
+    }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; max-width: 1100px; margin: 0 auto;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: all var(--transition);
+    }
+
+    .feature-card:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(201,168,76,0.3);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(30,92,46,0.4);
+      border: 1px solid var(--green-600);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: var(--green-300);
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-display); font-size: 1.05rem;
+      font-weight: 600; color: var(--white); margin-bottom: 0.5rem;
+    }
+
+    .feature-card p { font-size: 0.875rem; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+    /* ── Footer ── */
+    .landing-footer {
+      background: var(--green-900);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 2rem 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .landing-footer .copy {
+      font-size: 0.82rem; color: rgba(255,255,255,0.35);
+    }
+
+    @media (max-width: 900px) {
+      .hero, .features-section, .landing-footer { padding-left: 2rem; padding-right: 2rem; }
+      .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .hero h1 { font-size: 2.4rem; }
+      .hero-visual { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .landing-nav { padding: 0 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="landing-nav">
+  <div class="nav-logo">
+    <div class="logo-mark">N</div>
+    <div class="logo-text">
+      <div class="logo-title">Njala University</div>
+      <div class="logo-subtitle">Fees Portal</div>
+    </div>
+  </div>
+  <div class="landing-nav-links">
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#support">Support</a>
+  </div>
+  <div class="landing-nav-cta">
+    <a href="login.html" class="btn btn-ghost btn-sm" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.15);">Sign In</a>
+    <a href="login.html?mode=register" class="btn btn-gold btn-sm">Get Started</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-content animate-fadeup">
+      <div class="hero-eyebrow">
+        <i class="fas fa-graduation-cap"></i>
+        Academic Financial Portal — 2024/2025
+      </div>
+      <h1>Simplify Your <span>Fee Payments</span> at Njala</h1>
+      <p>A seamless, secure platform for managing tuition payments, tracking balances, and staying up-to-date with your academic financial obligations at Njala University.</p>
+      <div class="hero-cta">
+        <a href="login.html" class="btn btn-gold btn-lg">
+          <i class="fas fa-sign-in-alt"></i> Access Portal
+        </a>
+        <a href="login.html?mode=register" class="btn btn-secondary btn-lg"
+           style="background:rgba(255,255,255,0.07);color:var(--white);border-color:rgba(255,255,255,0.15)">
+          <i class="fas fa-user-plus"></i> Register
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual animate-fadeup" style="animation-delay:0.2s">
+      <div class="hero-card-stack">
+        <div class="hero-card back2"></div>
+        <div class="hero-card back1"></div>
+        <div class="hero-card main">
+          <div class="hc-header">
+            <span class="hc-title">My Fee Summary</span>
+            <span class="hc-badge">2024/25</span>
+          </div>
+          <div class="hc-amount"><span style="font-size:1rem;color:var(--green-300);margin-right:4px">SLL</span>4,200,000</div>
+          <div class="hc-sub">Total annual fees — Engineering</div>
+          <div class="hc-progress">
+            <div class="hc-progress-label">
+              <span>Paid: SLL 2,940,000</span>
+              <span>70%</span>
+            </div>
+            <div class="progress-bar"><div class="fill" style="width:70%"></div></div>
+          </div>
+          <div class="hc-fee-rows">
+            <div class="hc-fee-row">
+              <span class="n"><i class="fas fa-book" style="color:var(--gold);margin-right:6px"></i>Tuition Fee</span>
+              <span class="a">SLL 3,000,000</span>
+            </div>
+            <div class="hc-fee-row">
+              <span class="n"><i class="fas fa-home" style="color:var(--green-400);margin-right:6px"></i>Accommodation</span>
+              <span class="a">SLL 800,000</span>
+            </div>
+            <div class="hc-fee-row">
+              <span class="n"><i class="fas fa-flask" style="color:var(--blue);margin-right:6px"></i>Lab & Exams</span>
+              <span class="a">SLL 400,000</span>
+            </div>
+          </div>
+          <div class="hc-bottom">
+            <a href="login.html" class="btn btn-primary btn-sm" style="flex:1;text-align:center">Pay Now</a>
+            <a href="login.html" class="btn btn-ghost btn-sm" style="flex:1;text-align:center;color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.15)">View History</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="features-section" id="features">
+  <div class="section-label">What we offer</div>
+  <h2 class="section-title">Everything You Need</h2>
+  <p class="section-sub">Built specifically for Njala University's financial administration — fast, secure, and student-friendly.</p>
+
+  <div class="features-grid">
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+      <h3>Mobile Money Payments</h3>
+      <p>Pay your fees via Orange Money or Africell Money directly from your phone, with instant confirmation.</p>
+    </div>
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+      <h3>Real-Time Tracking</h3>
+      <p>Monitor your fee balance, payment history, and outstanding amounts in real time from any device.</p>
+    </div>
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+      <h3>Digital Receipts</h3>
+      <p>Automatically receive payment receipts via email and SMS as soon as your transaction is processed.</p>
+    </div>
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+      <h3>Secure & Encrypted</h3>
+      <p>Bank-grade encryption protects your financial data and personal information at every step.</p>
+    </div>
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-bell"></i></div>
+      <h3>Payment Reminders</h3>
+      <p>Automated SMS and email reminders keep you informed of upcoming deadlines and outstanding balances.</p>
+    </div>
+    <div class="feature-card animate-fadeup">
+      <div class="feature-icon"><i class="fas fa-users-cog"></i></div>
+      <h3>Admin Dashboard</h3>
+      <p>Powerful tools for finance staff to manage students, approve payments, and generate reports.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="landing-footer">
+  <div class="flex flex-center gap-1">
+    <div class="logo-mark" style="width:30px;height:30px;font-size:0.85rem">N</div>
+    <span style="font-size:0.9rem;font-weight:600;color:rgba(255,255,255,0.7)">Njala University</span>
+  </div>
+  <div class="copy">&copy; 2025 Njala University. Fees Management System. All rights reserved.</div>
+  <div class="flex gap-1">
+    <a href="#" style="color:rgba(255,255,255,0.4);font-size:0.82rem;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Privacy</a>
+    <a href="#" style="color:rgba(255,255,255,0.4);font-size:0.82rem;transition:color 0.2s" onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Support</a>
+  </div>
+</footer>
+
+</body>
+</html>

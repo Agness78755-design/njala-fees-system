@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Njala University Fees Portal</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ── Left Hero Panel ── -->
+  <div class="auth-hero">
+    <div class="auth-hero-brand">
+      <div class="logo">
+        <div class="logo-mark">N</div>
+        <div class="logo-text">
+          <div class="logo-title">Njala University</div>
+          <div class="logo-subtitle">Fees Management System</div>
+        </div>
+      </div>
+      <div class="auth-hero-content">
+        <h1>Welcome to the<br><span>Student Portal</span></h1>
+        <p>Access your fee balances, make payments, and manage your academic financial records — all in one place.</p>
+      </div>
+    </div>
+
+    <div class="auth-hero-stats">
+      <div class="hero-stat">
+        <div class="num">8K+</div>
+        <div class="label">Students</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">4</div>
+        <div class="label">Faculties</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">98%</div>
+        <div class="label">Uptime</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right Form Panel ── -->
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+
+      <!-- Tabs -->
+      <div class="tabs" id="authTabs" style="margin-bottom:1.75rem">
+        <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- ── Login Form ── -->
+      <div id="loginPanel" class="tab-panel active">
+        <h2>Welcome Back</h2>
+        <p class="subhead">Enter your credentials to access your account.</p>
+
+        <div id="loginAlert" class="alert alert-error hidden">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="loginAlertMsg">Invalid credentials.</span>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="loginId">Student ID / Username</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-id-card icon"></i>
+              <input type="text" id="loginId" placeholder="e.g. NJU/2021/0042" autocomplete="username" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPw">Password</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock icon"></i>
+              <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password" />
+              <span class="toggle-pw" onclick="togglePw('loginPw', this)"><i class="fas fa-eye"></i></span>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox-wrap">
+              <input type="checkbox" id="rememberMe" />
+              Remember me
+            </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Sign In</span>
+          </button>
+        </form>
+
+        <div class="divider">or continue as</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <a href="dashboard.html?role=student" class="btn btn-ghost btn-full"
+             style="font-size:0.82rem;padding:0.65rem">
+            <i class="fas fa-user-graduate" style="color:var(--green-600)"></i> Student Demo
+          </a>
+          <a href="admin.html?role=admin" class="btn btn-ghost btn-full"
+             style="font-size:0.82rem;padding:0.65rem">
+            <i class="fas fa-user-shield" style="color:var(--gold)"></i> Admin Demo
+          </a>
+        </div>
+      </div>
+
+      <!-- ── Register Form ── -->
+      <div id="registerPanel" class="tab-panel">
+        <h2>Create Account</h2>
+        <p class="subhead">Register with your Njala University student ID.</p>
+
+        <div id="registerAlert" class="alert alert-error hidden">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="registerAlertMsg">Please fill all fields correctly.</span>
+        </div>
+
+        <form id="registerForm" novalidate>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" id="regFirst" placeholder="Mohamed" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" id="regLast" placeholder="Koroma" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Student ID</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-id-badge icon"></i>
+              <input type="text" id="regStudentId" placeholder="NJU/2024/XXXX" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-envelope icon"></i>
+              <input type="email" id="regEmail" placeholder="student@njala.edu.sl" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-phone icon"></i>
+              <input type="tel" id="regPhone" placeholder="+232 76 000 000" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Faculty / Department</label>
+            <select id="regFaculty">
+              <option value="">Select your faculty…</option>
+              <option>Faculty of Agriculture</option>
+              <option>Faculty of Engineering</option>
+              <option>Faculty of Science</option>
+              <option>Faculty of Social Sciences</option>
+              <option>Faculty of Postgraduate Studies</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Create Password</label>
+            <div class="input-icon-wrap">
+              <i class="fas fa-lock icon"></i>
+              <input type="password" id="regPw" placeholder="Min. 8 characters" />
+              <span class="toggle-pw" onclick="togglePw('regPw', this)"><i class="fas fa-eye"></i></span>
+            </div>
+          </div>
+
+          <div style="margin-bottom:1.25rem">
+            <label class="checkbox-wrap" style="color:var(--gray-500);font-size:0.82rem">
+              <input type="checkbox" id="agreeTerms" />
+              I agree to the <a href="#" style="color:var(--green-600)">Terms of Use</a> and <a href="#" style="color:var(--green-600)">Privacy Policy</a>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="registerBtn">
+            <i class="fas fa-user-plus"></i>
+            <span>Create Account</span>
+          </button>
+        </form>
+      </div>
+
+      <p style="text-align:center;font-size:0.8rem;color:var(--gray-400);margin-top:1.5rem">
+        Need help? <a href="mailto:ict@njala.edu.sl" style="color:var(--green-600)">Contact ICT Support</a>
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+  // Check URL param for pre-select
+  const params = new URLSearchParams(location.search);
+  if (params.get('mode') === 'register') switchTab('register');
+</script>
+</body>
+</html>
